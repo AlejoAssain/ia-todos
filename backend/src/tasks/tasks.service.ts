@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -57,12 +58,19 @@ export class TasksService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} task`;
+  async findOne(id: number) {
+    const task = await this.tasksRepository.findOne({
+      where: { id },
+      relations: { steps: true },
+    });
+    if (!task) throw new NotFoundException(`Task #${id} not found`);
+    return task;
   }
 
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
+  async update(id: number, updateTaskDto: UpdateTaskDto) {
+    const task = await this.findOne(id);
+    Object.assign(task, updateTaskDto);
+    return this.tasksRepository.save(task);
   }
 
   async updateStepStatus(stepId: number, completed: boolean) {
@@ -89,14 +97,16 @@ export class TasksService {
 
     if (task) {
       task.completed =
-        task.steps.length > 0 && task.steps.every((taskStep) => taskStep.completed);
+        task.steps.length > 0 &&
+        task.steps.every((taskStep) => taskStep.completed);
       await this.tasksRepository.save(task);
     }
 
     return savedStep;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} task`;
+  async remove(id: number) {
+    const task = await this.findOne(id);
+    return this.tasksRepository.remove(task);
   }
 }
