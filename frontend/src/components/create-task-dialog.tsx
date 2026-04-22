@@ -1,10 +1,10 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import { createTask } from '../lib/api'
+import { useEffect, useState, type FormEvent } from 'react';
+import { createTask } from '../lib/api';
 
 interface CreateTaskDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onTaskCreated: () => void
+  isOpen: boolean;
+  onClose: () => void;
+  onTaskCreated: () => void;
 }
 
 export function CreateTaskDialog({
@@ -12,52 +12,52 @@ export function CreateTaskDialog({
   onClose,
   onTaskCreated,
 }: CreateTaskDialogProps) {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') {
-        onClose()
+        onClose();
       }
     }
 
-    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keydown', handleKeyDown);
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [onClose])
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     try {
-      setIsSubmitting(true)
-      setError(null)
+      setIsSubmitting(true);
+      setError(null);
 
       await createTask({
         description,
         title,
-      })
+      });
 
-      onClose()
-      onTaskCreated()
+      onClose();
+      onTaskCreated();
     } catch (submitError) {
       setError(
         submitError instanceof Error
           ? submitError.message
           : 'Could not create the task.',
-      )
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
   if (!isOpen) {
-    return null
+    return null;
   }
 
   return (
@@ -149,5 +149,5 @@ export function CreateTaskDialog({
         </form>
       </section>
     </div>
-  )
+  );
 }

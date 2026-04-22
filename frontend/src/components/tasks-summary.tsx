@@ -1,11 +1,11 @@
-import { StatCard } from './stat-card'
+import { StatCard } from './stat-card';
 
 interface TasksSummaryProps {
-  completedSteps: number
-  lastUpdated: Date | null
-  onRefresh: () => void
-  totalSteps: number
-  totalTasks: number
+  completedSteps: number;
+  lastUpdated: Date | null;
+  onRefresh: () => void;
+  totalSteps: number;
+  totalTasks: number;
 }
 
 export function TasksSummary({
@@ -64,5 +64,5 @@ export function TasksSummary({
         />
       </div>
     </section>
-  )
+  );
 }

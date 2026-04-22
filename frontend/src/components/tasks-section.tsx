@@ -1,11 +1,11 @@
-import { TaskCard } from './task-card'
-import type { Task } from '../types/task'
+import { TaskCard } from './task-card';
+import type { Task } from '../types/task';
 
 interface TasksSectionProps {
-  error: string | null
-  isLoading: boolean
-  onToggleStep: (stepId: number, completed: boolean) => Promise<void>
-  tasks: Task[]
+  error: string | null;
+  isLoading: boolean;
+  onToggleStep: (stepId: number, completed: boolean) => Promise<void>;
+  tasks: Task[];
 }
 
 function LoadingState() {
@@ -18,7 +18,7 @@ function LoadingState() {
         />
       ))}
     </div>
-  )
+  );
 }
 
 function ErrorState({ error }: { error: string }) {
@@ -29,7 +29,7 @@ function ErrorState({ error }: { error: string }) {
       </p>
       <p className="mt-3 text-sm leading-7 text-rose-50/85">{error}</p>
     </div>
-  )
+  );
 }
 
 function EmptyState() {
@@ -43,7 +43,7 @@ function EmptyState() {
         Create your first task and it will show up here with its steps.
       </p>
     </div>
-  )
+  );
 }
 
 export function TasksSection({
@@ -86,5 +86,5 @@ export function TasksSection({
         )}
       </div>
     </section>
-  )
+  );
 }

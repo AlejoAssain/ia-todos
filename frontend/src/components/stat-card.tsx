@@ -1,7 +1,7 @@
 interface StatCardProps {
-  label: string
-  value: string
-  accent?: string
+  label: string;
+  value: string;
+  accent?: string;
 }
 
 export function StatCard({
@@ -20,5 +20,5 @@ export function StatCard({
         {value}
       </p>
     </article>
-  )
+  );
 }

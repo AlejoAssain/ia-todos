@@ -1,16 +1,17 @@
-import type { Task } from '../types/task'
+import type { Task } from '../types/task';
 
 interface CreateTaskInput {
-  description: string
-  title: string
+  description: string;
+  title: string;
 }
 
 interface UpdateStepStatusInput {
-  completed: boolean
+  completed: boolean;
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? 'http://localhost:3000/api'
+  import.meta.env.VITE_API_URL?.replace(/\/$/, '') ??
+  'http://localhost:3000/api';
 
 export async function getTasks(signal?: AbortSignal): Promise<Task[]> {
   const response = await fetch(`${API_BASE_URL}/tasks`, {
@@ -19,13 +20,13 @@ export async function getTasks(signal?: AbortSignal): Promise<Task[]> {
       'Content-Type': 'application/json',
     },
     signal,
-  })
+  });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch tasks (${response.status})`)
+    throw new Error(`Failed to fetch tasks (${response.status})`);
   }
 
-  return response.json()
+  return response.json();
 }
 
 export async function createTask(input: CreateTaskInput): Promise<Task> {
@@ -35,14 +36,16 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
-  })
+  });
 
   if (!response.ok) {
-    const errorMessage = await response.text()
-    throw new Error(errorMessage || `Failed to create task (${response.status})`)
+    const errorMessage = await response.text();
+    throw new Error(
+      errorMessage || `Failed to create task (${response.status})`,
+    );
   }
 
-  return response.json()
+  return response.json();
 }
 
 export async function updateStepStatus(
@@ -55,12 +58,12 @@ export async function updateStepStatus(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(input),
-  })
+  });
 
   if (!response.ok) {
-    const errorMessage = await response.text()
+    const errorMessage = await response.text();
     throw new Error(
       errorMessage || `Failed to update step status (${response.status})`,
-    )
+    );
   }
 }

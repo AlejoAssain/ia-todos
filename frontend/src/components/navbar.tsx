@@ -1,5 +1,5 @@
 interface NavbarProps {
-  onCreateTaskClick: () => void
+  onCreateTaskClick: () => void;
 }
 
 export function Navbar({ onCreateTaskClick }: NavbarProps) {
@@ -23,5 +23,5 @@ export function Navbar({ onCreateTaskClick }: NavbarProps) {
         New task
       </button>
     </nav>
-  )
+  );
 }
