@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -63,6 +63,37 @@ export class TasksService {
 
   update(id: number, updateTaskDto: UpdateTaskDto) {
     return `This action updates a #${id} task`;
+  }
+
+  async updateStepStatus(stepId: number, completed: boolean) {
+    const step = await this.stepsRepository.findOne({
+      where: { id: stepId },
+      relations: {
+        task: true,
+      },
+    });
+
+    if (!step) {
+      throw new NotFoundException(`Step with id ${stepId} was not found`);
+    }
+
+    step.completed = completed;
+
+    const savedStep = await this.stepsRepository.save(step);
+    const task = await this.tasksRepository.findOne({
+      where: { id: step.task.id },
+      relations: {
+        steps: true,
+      },
+    });
+
+    if (task) {
+      task.completed =
+        task.steps.length > 0 && task.steps.every((taskStep) => taskStep.completed);
+      await this.tasksRepository.save(task);
+    }
+
+    return savedStep;
   }
 
   remove(id: number) {

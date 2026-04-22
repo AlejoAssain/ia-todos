@@ -1,121 +1,64 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import { CreateTaskDialog } from './components/create-task-dialog';
+import { Navbar } from './components/navbar';
+import { TasksSection } from './components/tasks-section';
+import { TasksSummary } from './components/tasks-summary';
+import { useTasks } from './hooks/use-tasks';
+import { updateStepStatus } from './lib/api';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const { error, isLoading, lastUpdated, refreshTasks, tasks } = useTasks();
+
+  const totalTasks = tasks.length;
+  const totalSteps = tasks.reduce(
+    (count, task) => count + task.steps.length,
+    0,
+  );
+  const completedSteps = tasks.reduce(
+    (count, task) => count + task.steps.filter((step) => step.completed).length,
+    0,
+  );
+
+  async function handleToggleStep(stepId: number, completed: boolean) {
+    await updateStepStatus(stepId, { completed });
+    await refreshTasks(false);
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="relative isolate min-h-screen overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-[10%] top-16 h-64 w-64 rounded-full bg-fuchsia-500/18 blur-3xl" />
+        <div className="absolute right-[12%] top-24 h-80 w-80 rounded-full bg-violet-500/16 blur-3xl" />
+        <div className="absolute bottom-0 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-indigo-500/10 blur-3xl" />
+      </div>
 
-      <div className="ticks"></div>
+      <main className="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-5 py-6 sm:px-8 sm:py-10">
+        <Navbar onCreateTaskClick={() => setIsCreateDialogOpen(true)} />
+        <TasksSummary
+          completedSteps={completedSteps}
+          lastUpdated={lastUpdated}
+          onRefresh={() => void refreshTasks()}
+          totalSteps={totalSteps}
+          totalTasks={totalTasks}
+        />
+        <TasksSection
+          error={error}
+          isLoading={isLoading}
+          onToggleStep={handleToggleStep}
+          tasks={tasks}
+        />
+      </main>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {isCreateDialogOpen ? (
+        <CreateTaskDialog
+          isOpen={isCreateDialogOpen}
+          onClose={() => setIsCreateDialogOpen(false)}
+          onTaskCreated={() => void refreshTasks()}
+        />
+      ) : null}
+    </div>
+  );
 }
 
-export default App
+export default App;
