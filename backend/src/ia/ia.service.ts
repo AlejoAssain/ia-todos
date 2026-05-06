@@ -1,13 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import ollama from 'ollama';
 import {
   buildGenerateStepsPrompt,
   buildInferTaskDescriptionPrompt,
 } from './prompts';
 import { stepSchema, taskDescriptionSchema } from './schemas';
 
+type AiProvider = 'ollama' | 'openai';
+
 @Injectable()
 export class IaService {
+  private readonly ollamaBaseUrl =
+    process.env.OLLAMA_BASE_URL?.replace(/\/$/, '') ?? 'http://localhost:11434';
+  private readonly ollamaModel = process.env.OLLAMA_MODEL ?? 'llama3.2:1b';
+  private readonly openAiModel = process.env.OPENAI_MODEL ?? 'gpt-5';
+  private readonly provider = this.getProvider();
+
+  private getProvider(): AiProvider {
+    const provider = process.env.IA_PROVIDER ?? 'ollama';
+
+    if (provider === 'ollama' || provider === 'openai') {
+      return provider;
+    }
+
+    throw new Error(
+      `Unsupported IA_PROVIDER "${provider}". Use "ollama" or "openai".`,
+    );
+  }
+
   private parseTaskDescription(rawResponse: string): string {
     try {
       return this.validateTaskDescription(JSON.parse(rawResponse));
@@ -91,20 +110,114 @@ export class IaService {
   private async chat(
     prompt: string,
     format: Record<string, unknown> = stepSchema,
+    formatName = 'ai_response',
   ): Promise<string> {
-    const response = await ollama.chat({
-      model: 'llama3.2:1b',
-      stream: false,
-      format,
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+    if (this.provider === 'openai') {
+      return this.chatWithOpenAi(prompt, format, formatName);
+    }
+
+    return this.chatWithOllama(prompt, format);
+  }
+
+  private async chatWithOllama(
+    prompt: string,
+    format: Record<string, unknown>,
+  ): Promise<string> {
+    const response = await fetch(`${this.ollamaBaseUrl}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: this.ollamaModel,
+        stream: false,
+        format,
+        messages: [
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+      }),
     });
 
-    return response.message.content;
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(
+        errorMessage || `Ollama request failed with status ${response.status}.`,
+      );
+    }
+
+    const data = (await response.json()) as {
+      message?: {
+        content?: string;
+      };
+    };
+
+    if (!data.message?.content) {
+      throw new Error('Ollama response did not include message content.');
+    }
+
+    return data.message.content;
+  }
+
+  private async chatWithOpenAi(
+    prompt: string,
+    format: Record<string, unknown>,
+    formatName: string,
+  ): Promise<string> {
+    const apiKey = process.env.OPENAI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY is required when IA_PROVIDER=openai.');
+    }
+
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: this.openAiModel,
+        input: prompt,
+        text: {
+          format: {
+            type: 'json_schema',
+            name: formatName,
+            schema: format,
+          },
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorMessage = await response.text();
+      throw new Error(
+        errorMessage || `OpenAI request failed with status ${response.status}.`,
+      );
+    }
+
+    const data = (await response.json()) as {
+      output?: Array<{
+        content?: Array<{
+          text?: string;
+        }>;
+      }>;
+      output_text?: string;
+    };
+
+    const outputText =
+      data.output_text ??
+      data.output
+        ?.flatMap((item) => item.content ?? [])
+        .find((content) => typeof content.text === 'string')?.text;
+
+    if (!outputText) {
+      throw new Error('OpenAI response did not include text output.');
+    }
+
+    return outputText;
   }
 
   async generateHelloMessage() {
@@ -115,6 +228,7 @@ export class IaService {
     const rawResponse = await this.chat(
       buildInferTaskDescriptionPrompt(taskTitle),
       taskDescriptionSchema,
+      'task_description',
     );
 
     console.log(
@@ -132,9 +246,11 @@ export class IaService {
   ): Promise<string[]> {
     const rawResponse = await this.chat(
       buildGenerateStepsPrompt(taskTitle, taskDescription),
+      stepSchema,
+      'task_steps',
     );
 
-    console.log('\n\nIA raw response: \nSTART', rawResponse, 'END\n\n');
+    console.log('\n\nIA raw task responses: \nSTART', rawResponse, 'END\n\n');
 
     return this.parseJsonStringArray(rawResponse);
   }

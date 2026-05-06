@@ -10,7 +10,7 @@
     <img alt="Frontend" src="https://img.shields.io/badge/frontend-React%20%2B%20Vite-61DAFB" />
     <img alt="Backend" src="https://img.shields.io/badge/backend-NestJS-E0234E" />
     <img alt="Language" src="https://img.shields.io/badge/language-TypeScript-3178C6" />
-    <img alt="AI" src="https://img.shields.io/badge/AI-Ollama%20%2B%20llama3.2%3A1b-111827" />
+    <img alt="AI" src="https://img.shields.io/badge/AI-Ollama%20or%20OpenAI-111827" />
   </p>
 </div>
 
@@ -43,7 +43,7 @@ Most todo apps are good at storing tasks, but not at helping people start them. 
 
 - Frontend: `React 19`, `Vite`, `TypeScript`
 - Backend: `NestJS`, `TypeScript`
-- AI: `Ollama` with `llama3.2:1b`
+- AI: `Ollama` with `llama3.2:1b` or the `OpenAI API`
 - Target persistence: `SQLite`
 
 ## Project Structure
@@ -61,14 +61,36 @@ ia-todos/
 
 - `Node.js` 20+
 - `npm`
-- `Ollama` installed locally
-- Model pulled locally:
+- `Ollama` installed locally for local AI mode, or an `OPENAI_API_KEY`
+- Local model pulled when using Ollama:
 
 ```bash
 ollama pull llama3.2:1b
 ```
 
-### 2. Run the backend
+### 2. Run the app
+
+The helper script asks which AI provider to use:
+
+```bash
+./dev-start.zsh
+```
+
+Choose:
+
+- `1` for local Ollama.
+- `2` for OpenAI API. The script will ask for `OPENAI_API_KEY` if it is not already exported.
+
+Optional environment variables:
+
+```bash
+OLLAMA_MODEL=llama3.2:1b
+OLLAMA_BASE_URL=http://localhost:11434
+OPENAI_MODEL=gpt-5
+IA_PROVIDER=ollama # or openai
+```
+
+### 3. Run the backend manually
 
 ```bash
 cd backend
@@ -78,7 +100,13 @@ npm run start:dev
 
 API available at `http://localhost:3000/api`
 
-### 3. Run the frontend
+For manual OpenAI API mode:
+
+```bash
+IA_PROVIDER=openai OPENAI_API_KEY="your_api_key_here" npm run start:dev
+```
+
+### 4. Run the frontend manually
 
 ```bash
 cd frontend
