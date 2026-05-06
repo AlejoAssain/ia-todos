@@ -1,5 +1,4 @@
 <div align="center">
-  <img src="./frontend/src/assets/hero.png" alt="IA Todos logo" width="132" />
 
 # IA Todos
 
@@ -16,24 +15,26 @@
 
 ## Overview
 
-`IA Todos` is a small product-focused project built around a simple problem: big or vague tasks are hard to start. The goal is to let a user enter an objective and use AI to break it down into concrete, editable steps that are easier to execute.d
+`IA Todos` is a small product-focused project built around a simple problem: big or vague tasks are hard to start. The goal is to let a user enter an objective and use AI to break it down into concrete steps that are easier to execute.
 
-This repository is currently in the foundation stage. The frontend and backend structure are in place, and the next milestone is connecting real task, step, persistence, and AI-generation flows end to end.
+This repository is currently in an MVP stage. The frontend and backend can create tasks, generate steps with AI, persist them, and track step completion.
 
 ## Product Direction
 
 - Create tasks from a simple interface.
 - Use AI to generate suggested steps for each task.
-- Let users edit, complete, and delete steps manually.
+- Let users complete generated steps manually.
+- Let users create, edit, and delete steps manually.
 - Show overall progress at the task level.
 
 ## Current Status
 
 - `frontend/` initialized with `React + Vite + TypeScript`.
 - `backend/` initialized with `NestJS + TypeScript`.
-- Backend currently exposes an `/api` base path and an initial `tasks` module.
-- `Ollama` is the planned local AI integration for the MVP.
-- Full CRUD behavior, persistence, and AI workflow are still being implemented.
+- Backend exposes an `/api` base path and a `tasks` module.
+- Tasks and generated steps are persisted with SQLite.
+- AI generation can run through local Ollama or the OpenAI API.
+- Step creation, editing, deletion, and completion are implemented.
 
 ## Why It Matters
 
@@ -125,20 +126,25 @@ The initial task module is mounted under:
 - `POST /api/tasks`
 - `PATCH /api/tasks/:id`
 - `DELETE /api/tasks/:id`
+- `POST /api/steps`
+- `POST /api/steps/empty`
+- `PATCH /api/steps/:stepId`
+- `PATCH /api/steps/:stepId/status`
+- `DELETE /api/steps/:stepId`
 
-The route structure exists today, while the business logic is still in scaffold form.
+Task creation, AI step generation, listing, task updates, task deletion, and step CRUD are implemented.
 
 ## Roadmap
 
 - [x] Set up separate frontend and backend apps
 - [x] Bootstrap a NestJS API with a global `/api` prefix
 - [x] Create the initial `tasks` module
-- [ ] Implement real entities and persistence
-- [ ] Generate task steps with AI
-- [ ] Add full step-level CRUD
-- [ ] Support step completion tracking
-- [ ] Add task progress summaries
-- [ ] Connect frontend and backend flows
+- [x] Implement real entities and persistence
+- [x] Generate task steps with AI
+- [x] Support step completion tracking
+- [x] Add task progress summaries
+- [x] Connect frontend and backend flows
+- [x] Add full step-level CRUD
 
 ## Notes for Reviewers
 

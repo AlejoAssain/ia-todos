@@ -2,16 +2,12 @@ import { StatCard } from './stat-card';
 
 interface TasksSummaryProps {
   completedSteps: number;
-  lastUpdated: Date | null;
-  onRefresh: () => void;
   totalSteps: number;
   totalTasks: number;
 }
 
 export function TasksSummary({
   completedSteps,
-  lastUpdated,
-  onRefresh,
   totalSteps,
   totalTasks,
 }: TasksSummaryProps) {
@@ -25,24 +21,6 @@ export function TasksSummary({
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
             Tasks summary
           </h2>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            className="rounded-full bg-violet-300 px-5 py-3 text-sm font-semibold text-violet-950 transition hover:bg-violet-200"
-            onClick={onRefresh}
-            type="button"
-          >
-            Refresh tasks
-          </button>
-          <div className="rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-violet-100/60">
-            {lastUpdated
-              ? `Last sync ${lastUpdated.toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}`
-              : 'Waiting for first sync'}
-          </div>
         </div>
       </div>
 

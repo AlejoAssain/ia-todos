@@ -5,12 +5,18 @@ import { Navbar } from './components/navbar';
 import { TasksSection } from './components/tasks-section';
 import { TasksSummary } from './components/tasks-summary';
 import { useTasks } from './hooks/use-tasks';
-import { updateStepStatus } from './lib/api';
+import {
+  createStep,
+  deleteStep,
+  deleteTask,
+  updateStep,
+  updateStepStatus,
+} from './lib/api';
 
 function App() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
-  const { error, isLoading, lastUpdated, refreshTasks, tasks } = useTasks();
+  const { error, isLoading, refreshTasks, tasks } = useTasks();
 
   const totalTasks = tasks.length;
   const totalSteps = tasks.reduce(
@@ -24,6 +30,26 @@ function App() {
 
   async function handleToggleStep(stepId: number, completed: boolean) {
     await updateStepStatus(stepId, { completed });
+    await refreshTasks(false);
+  }
+
+  async function handleCreateStep(taskId: number, content: string) {
+    await createStep({ content, taskId });
+    await refreshTasks(false);
+  }
+
+  async function handleUpdateStep(stepId: number, content: string) {
+    await updateStep(stepId, { content });
+    await refreshTasks(false);
+  }
+
+  async function handleDeleteStep(stepId: number) {
+    await deleteStep(stepId);
+    await refreshTasks(false);
+  }
+
+  async function handleDeleteTask(taskId: number) {
+    await deleteTask(taskId);
     await refreshTasks(false);
   }
 
@@ -42,15 +68,17 @@ function App() {
         />
         <TasksSummary
           completedSteps={completedSteps}
-          lastUpdated={lastUpdated}
-          onRefresh={() => void refreshTasks()}
           totalSteps={totalSteps}
           totalTasks={totalTasks}
         />
         <TasksSection
           error={error}
           isLoading={isLoading}
+          onCreateStep={handleCreateStep}
+          onDeleteStep={handleDeleteStep}
+          onDeleteTask={handleDeleteTask}
           onToggleStep={handleToggleStep}
+          onUpdateStep={handleUpdateStep}
           tasks={tasks}
         />
       </main>

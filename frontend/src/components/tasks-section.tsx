@@ -4,7 +4,11 @@ import type { Task } from '../types/task';
 interface TasksSectionProps {
   error: string | null;
   isLoading: boolean;
+  onCreateStep: (taskId: number, content: string) => Promise<void>;
+  onDeleteStep: (stepId: number) => Promise<void>;
+  onDeleteTask: (taskId: number) => Promise<void>;
   onToggleStep: (stepId: number, completed: boolean) => Promise<void>;
+  onUpdateStep: (stepId: number, content: string) => Promise<void>;
   tasks: Task[];
 }
 
@@ -49,7 +53,11 @@ function EmptyState() {
 export function TasksSection({
   error,
   isLoading,
+  onCreateStep,
+  onDeleteStep,
+  onDeleteTask,
   onToggleStep,
+  onUpdateStep,
   tasks,
 }: TasksSectionProps) {
   return (
@@ -80,7 +88,15 @@ export function TasksSection({
         ) : (
           <div className="space-y-5">
             {tasks.map((task) => (
-              <TaskCard key={task.id} onToggleStep={onToggleStep} task={task} />
+              <TaskCard
+                key={task.id}
+                onCreateStep={onCreateStep}
+                onDeleteStep={onDeleteStep}
+                onDeleteTask={onDeleteTask}
+                onToggleStep={onToggleStep}
+                onUpdateStep={onUpdateStep}
+                task={task}
+              />
             ))}
           </div>
         )}

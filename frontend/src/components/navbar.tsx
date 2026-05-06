@@ -1,3 +1,5 @@
+import { Button, IconButton } from './ui/button';
+
 interface NavbarProps {
   onHelpClick: () => void;
   onCreateTaskClick: () => void;
@@ -16,24 +18,18 @@ export function Navbar({ onCreateTaskClick, onHelpClick }: NavbarProps) {
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
+        <IconButton
           aria-label="Open help"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-base font-bold text-violet-100/80 transition hover:bg-white/10 hover:text-white"
           onClick={onHelpClick}
           title="Help"
-          type="button"
         >
           ?
-        </button>
+        </IconButton>
 
-        <button
-          className="inline-flex items-center gap-2 rounded-full bg-violet-300 px-5 py-3 text-sm font-semibold text-violet-950 transition hover:bg-violet-200"
-          onClick={onCreateTaskClick}
-          type="button"
-        >
+        <Button className="inline-flex items-center gap-2" onClick={onCreateTaskClick}>
           <span className="text-base leading-none">+</span>
           New task
-        </button>
+        </Button>
       </div>
     </nav>
   );

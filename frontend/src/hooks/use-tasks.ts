@@ -5,7 +5,6 @@ import type { Task } from '../types/task';
 interface UseTasksResult {
   error: string | null;
   isLoading: boolean;
-  lastUpdated: Date | null;
   refreshTasks: (showLoadingState?: boolean) => Promise<void>;
   tasks: Task[];
 }
@@ -14,7 +13,6 @@ export function useTasks(): UseTasksResult {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   async function refreshTasks(showLoadingState = true) {
     try {
@@ -27,7 +25,6 @@ export function useTasks(): UseTasksResult {
       const nextTasks = await getTasks();
 
       setTasks(nextTasks);
-      setLastUpdated(new Date());
     } catch (loadError) {
       setError(
         loadError instanceof Error
@@ -51,7 +48,6 @@ export function useTasks(): UseTasksResult {
         }
 
         setTasks(nextTasks);
-        setLastUpdated(new Date());
       } catch (loadError) {
         if (!isMounted) {
           return;
@@ -79,7 +75,6 @@ export function useTasks(): UseTasksResult {
   return {
     error,
     isLoading,
-    lastUpdated,
     refreshTasks,
     tasks,
   };

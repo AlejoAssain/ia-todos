@@ -3,6 +3,7 @@ export interface Step {
   content: string;
   completed: boolean;
   createdAt: string;
+  position: number;
 }
 
 export interface Task {

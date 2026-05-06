@@ -24,6 +24,12 @@ export class Step {
   content: string;
 
   /**
+   * Position of the step inside its task.
+   */
+  @Column({ default: 0 })
+  position: number;
+
+  /**
    * Marks if the step is fully completed
    */
   @Column({ default: false })
@@ -32,7 +38,7 @@ export class Step {
   /**
    * Task associated with this step
    */
-  @ManyToOne(() => Task, (task) => task.steps)
+  @ManyToOne(() => Task, (task) => task.steps, { onDelete: 'CASCADE' })
   task: Task;
 
   @CreateDateColumn()
