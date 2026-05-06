@@ -1,7 +1,7 @@
 import type { Task } from '../types/task';
 
 interface CreateTaskInput {
-  description: string;
+  description?: string;
   title: string;
 }
 

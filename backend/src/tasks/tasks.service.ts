@@ -19,9 +19,12 @@ export class TasksService {
   ) {}
 
   async create(createTaskDto: CreateTaskDto) {
+    const description =
+      createTaskDto.description ??
+      (await this.iaService.inferTaskDescription(createTaskDto.title));
     const stepsContent = await this.iaService.generateSteps(
       createTaskDto.title,
-      createTaskDto.description,
+      description,
     );
 
     return this.tasksRepository.manager.transaction(async (manager) => {
@@ -30,7 +33,7 @@ export class TasksService {
 
       const newTask = tasksRepository.create({
         title: createTaskDto.title,
-        description: createTaskDto.description,
+        description,
       });
 
       const savedTask = await tasksRepository.save(newTask);

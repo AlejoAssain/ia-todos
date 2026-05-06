@@ -55,9 +55,11 @@ export function TaskCard({ onToggleStep, task }: TaskCardProps) {
             <h3 className="text-2xl font-semibold tracking-tight text-white">
               {task.title}
             </h3>
-            <p className="mt-2 max-w-2xl text-sm leading-7 text-violet-100/72">
-              {task.description}
-            </p>
+            {task.description ? (
+              <p className="mt-2 max-w-2xl text-sm leading-7 text-violet-100/72">
+                {task.description}
+              </p>
+            ) : null}
           </div>
         </div>
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { CreateTaskDialog } from './components/create-task-dialog';
+import { HelpDialog } from './components/help-dialog';
 import { Navbar } from './components/navbar';
 import { TasksSection } from './components/tasks-section';
 import { TasksSummary } from './components/tasks-summary';
@@ -8,6 +9,7 @@ import { updateStepStatus } from './lib/api';
 
 function App() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const { error, isLoading, lastUpdated, refreshTasks, tasks } = useTasks();
 
   const totalTasks = tasks.length;
@@ -34,7 +36,10 @@ function App() {
       </div>
 
       <main className="relative mx-auto flex min-h-screen max-w-7xl flex-col gap-8 px-5 py-6 sm:px-8 sm:py-10">
-        <Navbar onCreateTaskClick={() => setIsCreateDialogOpen(true)} />
+        <Navbar
+          onCreateTaskClick={() => setIsCreateDialogOpen(true)}
+          onHelpClick={() => setIsHelpDialogOpen(true)}
+        />
         <TasksSummary
           completedSteps={completedSteps}
           lastUpdated={lastUpdated}
@@ -55,6 +60,13 @@ function App() {
           isOpen={isCreateDialogOpen}
           onClose={() => setIsCreateDialogOpen(false)}
           onTaskCreated={() => void refreshTasks()}
+        />
+      ) : null}
+
+      {isHelpDialogOpen ? (
+        <HelpDialog
+          isOpen={isHelpDialogOpen}
+          onClose={() => setIsHelpDialogOpen(false)}
         />
       ) : null}
     </div>

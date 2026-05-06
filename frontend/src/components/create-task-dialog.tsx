@@ -39,7 +39,7 @@ export function CreateTaskDialog({
       setError(null);
 
       await createTask({
-        description,
+        description: description.trim() || undefined,
         title,
       });
 
@@ -79,8 +79,8 @@ export function CreateTaskDialog({
               Create a task
             </h2>
             <p className="mt-3 text-sm leading-7 text-violet-100/65">
-              Add a title and a short description. The backend will generate the
-              first set of steps with AI.
+              Add a title and, optionally, a short description. The backend will
+              generate the first set of steps with AI.
             </p>
           </div>
 
@@ -111,7 +111,7 @@ export function CreateTaskDialog({
 
           <label className="block space-y-2">
             <span className="text-sm font-medium text-violet-100">
-              Description
+              Description optional
             </span>
             <textarea
               className="min-h-32 w-full resize-none rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-white outline-none transition placeholder:text-violet-200/30 focus:border-violet-300/40"
@@ -119,7 +119,6 @@ export function CreateTaskDialog({
               minLength={5}
               onChange={(event) => setDescription(event.target.value)}
               placeholder="Keep it simple, homemade, and ready before dinner."
-              required
               value={description}
             />
           </label>
