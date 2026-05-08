@@ -59,6 +59,35 @@ export class StepsService {
     return highestPosition + 1;
   }
 
+  private async updateTaskStepPositions(taskId: number) {
+    const steps = await this.stepsRepository.find({
+      where: {
+        task: {
+          id: taskId,
+        },
+      },
+      order: {
+        position: 'ASC',
+        id: 'ASC',
+      },
+    });
+
+    const stepsToUpdate = steps.filter((step, index) => {
+      const nextPosition = index + 1;
+
+      if (step.position === nextPosition) {
+        return false;
+      }
+
+      step.position = nextPosition;
+      return true;
+    });
+
+    if (stepsToUpdate.length > 0) {
+      await this.stepsRepository.save(stepsToUpdate);
+    }
+  }
+
   async create(createStepDto: CreateStepDto) {
     const task = await this.findTask(createStepDto.taskId);
     const step = this.stepsRepository.create({
@@ -171,6 +200,7 @@ export class StepsService {
 
     const taskId = step.task.id;
     const removedStep = await this.stepsRepository.remove(step);
+    await this.updateTaskStepPositions(taskId);
     await this.updateTaskCompletion(taskId);
 
     return removedStep;
