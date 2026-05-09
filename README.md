@@ -5,7 +5,7 @@
 **An AI-assisted task app that turns goals into actionable steps.**
 
   <p>
-    <img alt="Status" src="https://img.shields.io/badge/status-WIP-orange" />
+    <img alt="Status" src="https://img.shields.io/badge/status-MVP-green" />
     <img alt="Frontend" src="https://img.shields.io/badge/frontend-React%20%2B%20Vite-61DAFB" />
     <img alt="Backend" src="https://img.shields.io/badge/backend-NestJS-E0234E" />
     <img alt="Language" src="https://img.shields.io/badge/language-TypeScript-3178C6" />
@@ -90,6 +90,14 @@ FRONTEND_PORT=80 docker compose up --build
 OLLAMA_MODEL=llama3.2:1b docker compose up --build
 IA_PROVIDER=openai OPENAI_API_KEY="your_api_key_here" docker compose up --build
 ```
+
+## Usage
+
+1. Open `http://localhost:8080`.
+2. Create a task with a clear title and, optionally, a short description.
+3. The app generates suggested steps with the selected AI provider.
+4. Mark steps as done as you progress.
+5. Add, edit, or delete steps whenever the plan needs adjustment.
 
 ## Tech Stack
 
