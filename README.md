@@ -19,26 +19,77 @@
 
 This repository is currently in an MVP stage. The frontend and backend can create tasks, generate steps with AI, persist them, and track step completion.
 
-## Product Direction
-
-- Create tasks from a simple interface.
-- Use AI to generate suggested steps for each task.
-- Let users complete generated steps manually.
-- Let users create, edit, and delete steps manually.
-- Show overall progress at the task level.
-
-## Current Status
-
-- `frontend/` initialized with `React + Vite + TypeScript`.
-- `backend/` initialized with `NestJS + TypeScript`.
-- Backend exposes an `/api` base path and a `tasks` module.
-- Tasks and generated steps are persisted with SQLite.
-- AI generation can run through local Ollama or the OpenAI API.
-- Step creation, editing, deletion, and completion are implemented.
-
-## Why It Matters
-
 Most todo apps are good at storing tasks, but not at helping people start them. `IA Todos` is meant to bridge that gap by turning "I need to do this" into a clearer sequence of next actions.
+
+## Installation
+
+### 1. Prerequisites
+
+- `Docker Engine 20.10+` with `Docker Compose v2`
+- Optional: `Node.js` 22+ and `npm` to use the root helper scripts
+- `Ollama` installed locally for local AI mode, or an `OPENAI_API_KEY`
+
+If you use Ollama, start the local service and pull the default model first:
+
+```bash
+ollama serve
+ollama pull llama3.2:1b
+```
+
+The default Ollama model is `llama3.2:1b` because it is small and quick to run
+for local development. You can use a different local model by setting
+`OLLAMA_MODEL`.
+
+### 2. Clone the repo
+
+```bash
+git clone <repo-url>
+cd ia-todos
+```
+
+### 3. Run Production
+
+With Docker directly:
+
+```bash
+docker compose up --build
+```
+
+Or with the helper script:
+
+```bash
+npm run start
+```
+
+The helper script asks which AI provider to use, checks Docker, builds the
+images, and starts the app with Docker Compose. If you use Docker directly,
+configure the provider with environment variables.
+
+Frontend is available at:
+
+```text
+http://localhost:8080
+```
+
+To stop the app:
+
+```bash
+docker compose down
+```
+
+Or, if you used the helper script:
+
+```bash
+npm run stop
+```
+
+Optional production overrides:
+
+```bash
+FRONTEND_PORT=80 docker compose up --build
+OLLAMA_MODEL=llama3.2:1b docker compose up --build
+IA_PROVIDER=openai OPENAI_API_KEY="your_api_key_here" docker compose up --build
+```
 
 ## Tech Stack
 
@@ -56,26 +107,26 @@ ia-todos/
 └── README.md
 ```
 
-## Getting Started
+## Development
 
-### 1. Prerequisites
-
-- `Node.js` 20+
-- `npm`
-- `Ollama` installed locally for local AI mode, or an `OPENAI_API_KEY`
-- Local model pulled when using Ollama:
+### Run checks
 
 ```bash
-ollama pull llama3.2:1b
+npm test
 ```
 
-### 2. Run the app
+This validates both launcher scripts and both Docker Compose files.
+
+### Run the app in dev mode
 
 The helper script asks which AI provider to use:
 
 ```bash
-./dev-start.zsh
+npm run dev
 ```
+
+When you choose local Ollama, the script checks that the local Ollama service is
+reachable before starting the app.
 
 Choose:
 
@@ -91,7 +142,39 @@ OPENAI_MODEL=gpt-5
 IA_PROVIDER=ollama # or openai
 ```
 
-### 3. Run the backend manually
+### Docker Compose Dev
+
+This keeps the SQLite database as `backend/dev.sqlite`, exposes the backend at
+`http://localhost:3000/api`, exposes the frontend at `http://localhost:5173`,
+and points the backend container at Ollama running on the host machine.
+
+Start Ollama on your host first:
+
+```bash
+ollama serve
+ollama pull llama3.2:1b
+```
+
+Then run:
+
+```bash
+docker compose -f docker-compose.dev.yml up --build
+```
+
+Optional overrides:
+
+```bash
+OLLAMA_MODEL=llama3.2:1b docker compose -f docker-compose.dev.yml up --build
+OLLAMA_BASE_URL=http://host.docker.internal:11434 docker compose -f docker-compose.dev.yml up --build
+```
+
+For OpenAI API mode instead of Ollama:
+
+```bash
+IA_PROVIDER=openai OPENAI_API_KEY="your_api_key_here" docker compose -f docker-compose.dev.yml up --build
+```
+
+### Run the backend manually
 
 ```bash
 cd backend
@@ -107,7 +190,7 @@ For manual OpenAI API mode:
 IA_PROVIDER=openai OPENAI_API_KEY="your_api_key_here" npm run start:dev
 ```
 
-### 4. Run the frontend manually
+### Run the frontend manually
 
 ```bash
 cd frontend
@@ -116,6 +199,23 @@ npm run dev
 ```
 
 Frontend available at `http://localhost:5173`
+
+## Product Direction
+
+- Create tasks from a simple interface.
+- Use AI to generate suggested steps for each task.
+- Let users complete generated steps manually.
+- Let users create, edit, and delete steps manually.
+- Show overall progress at the task level.
+
+## Current Status
+
+- `frontend/` initialized with `React + Vite + TypeScript`.
+- `backend/` initialized with `NestJS + TypeScript`.
+- Backend exposes an `/api` base path and a `tasks` module.
+- Tasks and generated steps are persisted with SQLite.
+- AI generation can run through local Ollama or the OpenAI API.
+- Step creation, editing, deletion, and completion are implemented.
 
 ## API Snapshot
 

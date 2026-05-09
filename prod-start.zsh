@@ -3,11 +3,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-RUN_MODE="local"
 APP_STARTED="false"
-APP_NAME="ia-todos-devmode"
-REQUIRED_NODE_MAJOR=22
-REQUIRED_NODE_VERSION="${REQUIRED_NODE_MAJOR}+"
+APP_NAME="ia-todos-prod"
 
 bold=$'\033[1m'
 dim=$'\033[2m'
@@ -51,7 +48,7 @@ render_header() {
   echo "=================================================="
   echo "  $APP_NAME"
   echo "=================================================="
-  echo "${reset}${dim}AI-assisted todos development launcher${reset}"
+  echo "${reset}${dim}Production Docker launcher${reset}"
 }
 
 host_ollama_probe_url() {
@@ -76,6 +73,7 @@ choose_ai_provider() {
     1)
       export IA_PROVIDER="ollama"
       export OLLAMA_MODEL="${OLLAMA_MODEL:-llama3.2:1b}"
+      export OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://host.docker.internal:11434}"
       success "Using local Ollama with model: $OLLAMA_MODEL"
       ;;
     2)
@@ -101,32 +99,6 @@ choose_ai_provider() {
   esac
 }
 
-choose_run_mode() {
-  local choice
-
-  section "Development mode"
-  echo "  1) Local Node processes"
-  info "     Requires Node.js ${REQUIRED_NODE_VERSION} and npm installed locally."
-  echo "  2) Docker Compose dev"
-  info "     Requires Docker Desktop or the Docker daemon to be running."
-  prompt_default "Option" "1"
-  read -r choice
-
-  case "${choice:-1}" in
-    1)
-      RUN_MODE="local"
-      success "Using local development mode."
-      ;;
-    2)
-      RUN_MODE="docker"
-      success "Using Docker Compose development mode."
-      ;;
-    *)
-      fail "Invalid option: $choice"
-      ;;
-  esac
-}
-
 ensure_docker_is_running() {
   if ! docker compose version >/dev/null 2>&1; then
     fail "Docker Compose is not available. Install Docker Desktop or Docker Compose and try again."
@@ -137,29 +109,6 @@ ensure_docker_is_running() {
   fi
 
   success "Docker is available."
-}
-
-ensure_node_is_available() {
-  local node_version
-  local node_major
-
-  if ! command -v node >/dev/null 2>&1; then
-    fail "Node.js is not available. Install Node.js ${REQUIRED_NODE_VERSION} and try again."
-  fi
-
-  if ! command -v npm >/dev/null 2>&1; then
-    fail "npm is not available. Install npm and try again."
-  fi
-
-  node_version="$(node -v)"
-  node_major="${node_version#v}"
-  node_major="${node_major%%.*}"
-
-  if [[ "$node_major" -lt "$REQUIRED_NODE_MAJOR" ]]; then
-    fail "Node.js $node_version is installed, but this app needs Node.js ${REQUIRED_NODE_VERSION}."
-  fi
-
-  success "Node.js $node_version and npm are available."
 }
 
 ensure_ollama_is_running() {
@@ -176,38 +125,19 @@ ensure_ollama_is_running() {
   success "Ollama is running locally."
 }
 
-start_docker_dev() {
+start_prod() {
   ensure_docker_is_running
 
   if [[ "${IA_PROVIDER:-}" == "ollama" ]]; then
-    export OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://host.docker.internal:11434}"
     ensure_ollama_is_running
   fi
 
-  section "Starting Docker dev app"
-  echo "Frontend: http://localhost:5173"
-  echo "Backend:  http://localhost:3000/api"
-  APP_STARTED="true"
-  docker compose -f "$ROOT_DIR/docker-compose.dev.yml" up --build
-}
-
-start_local_dev() {
-  ensure_node_is_available
-
-  if [[ "${IA_PROVIDER:-}" == "ollama" ]]; then
-    export OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-http://localhost:11434}"
-    ensure_ollama_is_running
-  fi
-
-  section "Starting local dev app"
-  echo "Backend:  http://localhost:3000/api"
-  echo "Frontend: http://localhost:5173"
+  section "Starting production app"
+  echo "Frontend: http://localhost:${FRONTEND_PORT:-8080}"
+  echo "Backend:  proxied through /api"
 
   APP_STARTED="true"
-  (cd "$ROOT_DIR/backend" && npm run start:dev) &
-  (cd "$ROOT_DIR/frontend" && npm run dev) &
-
-  wait
+  docker compose -f "$ROOT_DIR/docker-compose.yml" up --build
 }
 
 cleanup() {
@@ -216,35 +146,12 @@ cleanup() {
   fi
 
   echo
-  if [[ "$RUN_MODE" == "docker" ]]; then
-    warn "Stopping Docker development app..."
-    docker compose -f "$ROOT_DIR/docker-compose.dev.yml" down 2>/dev/null || true
-    return
-  fi
-
-  warn "Stopping local development servers..."
-
-  local job_pids
-  job_pids="$(jobs -pr)"
-
-  if [[ -n "$job_pids" ]]; then
-    echo "$job_pids" | xargs kill 2>/dev/null || true
-  fi
-
-  wait 2>/dev/null || true
+  warn "Stopping production app..."
+  docker compose -f "$ROOT_DIR/docker-compose.yml" down 2>/dev/null || true
 }
 
 trap cleanup INT TERM EXIT
 
 render_header
 choose_ai_provider
-choose_run_mode
-
-case "$RUN_MODE" in
-  docker)
-    start_docker_dev
-    ;;
-  local)
-    start_local_dev
-    ;;
-esac
+start_prod

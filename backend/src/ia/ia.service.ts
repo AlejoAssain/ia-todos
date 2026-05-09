@@ -13,6 +13,7 @@ export class IaService {
     process.env.OLLAMA_BASE_URL?.replace(/\/$/, '') ?? 'http://localhost:11434';
   private readonly ollamaModel = process.env.OLLAMA_MODEL ?? 'llama3.2:1b';
   private readonly openAiModel = process.env.OPENAI_MODEL ?? 'gpt-5';
+  private readonly debugEnabled = process.env.IA_DEBUG === 'true';
   private readonly provider = this.getProvider();
 
   private getProvider(): AiProvider {
@@ -117,6 +118,14 @@ export class IaService {
     }
 
     return this.chatWithOllama(prompt, format);
+  }
+
+  private logRawResponse(label: string, rawResponse: string) {
+    if (!this.debugEnabled) {
+      return;
+    }
+
+    console.debug(`\n\nIA raw ${label} response: \nSTART`, rawResponse, 'END\n\n');
   }
 
   private async chatWithOllama(
@@ -231,11 +240,7 @@ export class IaService {
       'task_description',
     );
 
-    console.log(
-      '\n\nIA raw description response: \nSTART',
-      rawResponse,
-      'END\n\n',
-    );
+    this.logRawResponse('description', rawResponse);
 
     return this.parseTaskDescription(rawResponse);
   }
@@ -250,7 +255,7 @@ export class IaService {
       'task_steps',
     );
 
-    console.log('\n\nIA raw task responses: \nSTART', rawResponse, 'END\n\n');
+    this.logRawResponse('task steps', rawResponse);
 
     return this.parseJsonStringArray(rawResponse);
   }

@@ -1,0 +1,11 @@
+{
+  "name": "ia-todos",
+  "private": true,
+  "scripts": {
+    "dev": "zsh ./dev-start.zsh",
+    "start-dev": "zsh ./dev-start.zsh",
+    "start": "zsh ./prod-start.zsh",
+    "stop": "docker compose down",
+    "test": "zsh ./test.zsh"
+  }
+}
