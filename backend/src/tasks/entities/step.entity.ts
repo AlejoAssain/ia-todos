@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -14,33 +15,57 @@ import { Task } from './task.entity';
  */
 @Entity()
 export class Step {
+  @ApiProperty({
+    description: 'Unique step identifier.',
+    example: 1,
+  })
   @PrimaryGeneratedColumn()
   id: number;
 
   /**
    * Human-readable text that describes what the step is about.
    */
+  @ApiProperty({
+    description: 'Human-readable text that describes what the step is about.',
+    example: 'Draft the presentation outline',
+  })
   @Column()
   content: string;
 
   /**
    * Position of the step inside its task.
    */
+  @ApiProperty({
+    description: 'Position of the step inside its task.',
+    example: 1,
+  })
   @Column({ default: 0 })
   position: number;
 
   /**
    * Marks if the step is fully completed
    */
+  @ApiProperty({
+    description: 'Whether the step is completed.',
+    example: false,
+  })
   @Column({ default: false })
   completed: boolean;
 
   /**
    * Task associated with this step
    */
+  @ApiProperty({
+    description: 'Task associated with this step.',
+    type: () => Task,
+  })
   @ManyToOne(() => Task, (task) => task.steps, { onDelete: 'CASCADE' })
   task: Task;
 
+  @ApiProperty({
+    description: 'Timestamp when the step was created.',
+    example: '2026-05-09T12:00:00.000Z',
+  })
   @CreateDateColumn()
   createdAt: Date;
 }

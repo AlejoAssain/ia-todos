@@ -17,7 +17,7 @@
 
 `IA Todos` is a small product-focused project built around a simple problem: big or vague tasks are hard to start. The goal is to let a user enter an objective and use AI to break it down into concrete steps that are easier to execute.
 
-This repository is currently in an MVP stage. The frontend and backend can create tasks, generate steps with AI, persist them, and track step completion.
+This repository is currently in an MVP stage, and automated application tests are not implemented yet. The frontend and backend can create tasks, generate steps with AI, persist them, and track step completion.
 
 Most todo apps are good at storing tasks, but not at helping people start them. `IA Todos` is meant to bridge that gap by turning "I need to do this" into a clearer sequence of next actions.
 
